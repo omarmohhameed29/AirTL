@@ -5,17 +5,26 @@ from sqlalchemy import create_engine
 import pandas as pd
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.email import EmailOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import timedelta, datetime
+from airflow.utils.trigger_rule import TriggerRule
 
 # Add the path to the plugins directory
 sys.path.append(os.path.join(os.path.dirname(__file__), '../plugins'))
 from fotmob_scrapper import extract, transform
+from mail_util import send_mail
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def pre_execute_callback(context):
+    logging.info("Preparing to send email")
+    logging.info(f"SMTP connection details: {context['task_instance'].task.conn_id}")
+
 
 def insert_into_table_task_func(**kwargs):
     """
@@ -48,6 +57,9 @@ def insert_into_table_task_func(**kwargs):
 
 default_args = {
     'owner': 'omar',
+    'email': ['omarmohhameed828@gmail.com'],
+    'email_on_failure': True,
+    'email_on_retry': True,
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
     'retry_exponential_backoff': False,
@@ -105,6 +117,17 @@ with DAG(
         provide_context=True
     )
 
+    # AllTaskSuccess = EmailOperator (
+    #     trigger_rule=TriggerRule.ALL_SUCCESS,
+    #     task_id="AllTaskSuccess",
+    #     to=["omarmohhameed828@gmail.com"],
+    #     subject="All Task completed successfully",
+    #     html_content='<h3>All Task completed successfully" </h3>')
+
+    email_task = PythonOperator(
+        task_id='send_email',
+        python_callable=send_mail
+    )
 
     # Task sequence
-    extract_task >> transform_task >> create_table_task >> insert_into_table_task
+    extract_task >> transform_task >> create_table_task >> insert_into_table_task >> email_task

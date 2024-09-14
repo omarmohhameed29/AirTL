@@ -120,6 +120,15 @@ services:
     command: webserver
     ports:
       - "8080:8080"
+    environment:
+      <<: *airflow-common-env
+      AIRFLOW__SMTP__SMTP_HOST: smtp.gmail.com
+      AIRFLOW__SMTP__SMTP_PORT: 587
+      AIRFLOW__SMTP__SMTP_USER: omarmohhameed828@gmail.com
+      AIRFLOW__SMTP__SMTP_PASSWORD: diceieedwxddhrqc
+      AIRFLOW__SMTP__SMTP_MAIL_FROM: omarmohhameed828@gmail.com
+      AIRFLOW__SMTP__SMTP_SSL: 'False'
+      AIRFLOW__SMTP__SMTP_STARTTLS: 'True'
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
