@@ -14,7 +14,7 @@ from airflow.utils.trigger_rule import TriggerRule
 # Add the path to the plugins directory
 sys.path.append(os.path.join(os.path.dirname(__file__), '../plugins'))
 from fotmob_scrapper import extract, transform
-from mail_util import send_mail
+from mail_util import send_success_mail, send_failure_mail
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -124,9 +124,15 @@ with DAG(
     #     html_content='<h3>All Task completed successfully" </h3>')
 
     email_task = PythonOperator(
-        task_id='send_email',
-        python_callable=send_mail
+        task_id='send_success_email',
+        python_callable=send_success_mail
     )
 
+    failure_email_task = PythonOperator(
+        task_id='send_failure_email',
+        python_callable=send_failure_mail,
+        trigger_rule=TriggerRule.ONE_FAILED
+    )
     # Task sequence
     extract_task >> transform_task >> create_table_task >> insert_into_table_task >> email_task
+    [extract_task, transform_task, create_table_task, insert_into_table_task, email_task] >> failure_email_task
