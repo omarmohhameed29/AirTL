@@ -90,7 +90,7 @@ def transform(df):
     # Splitting result column into home and away scores
     df[["home_score", "away_score"]] = df["result"].str.split(" - ", expand=True)
     df.drop(columns=["result"], inplace=True)
-
+    print(df.head())
     return df
 
 
@@ -112,12 +112,9 @@ def extract() -> pd.DataFrame:
     with requests.Session() as session:
         for league in leagues:
             details, matches = get_league_fixtures(session, league["id"], season)
-            print(details)
             if details and matches:
                 details_dict = extract_details(details)
                 matches_dict = extract_matches(matches)
-                print(matches_dict)
-                print(details_dict)
 
                 league_df = pd.DataFrame(matches_dict)
                 league_df = league_df.assign(**details_dict)
@@ -125,3 +122,5 @@ def extract() -> pd.DataFrame:
                 final_data = pd.concat([final_data, league_df], ignore_index=True)
 
     return final_data
+d = extract()
+t = transform(d)

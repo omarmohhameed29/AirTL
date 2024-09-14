@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import timedelta, datetime
 
@@ -16,25 +17,32 @@ from fotmob_scrapper import extract, transform
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Function to load data into Postgres
-def load_to_postgres(df: pd.DataFrame, **kwargs):
-    db_url = 'postgresql://user:password@localhost:5432/your_database'
-    engine = create_engine(db_url)
-    
-    try:
-        # Load DataFrame into the "matches" table
-        df.to_sql('matches', engine, if_exists='append', index=False)
-        logger.info("Data loaded into Postgres successfully!")
-    except Exception as e:
-        logger.error(f"Error loading data into Postgres: {e}")
-
 def insert_into_table_task_func(**kwargs):
     """
-    Insert transformed data into Postgres matches table.
+    Insert transformed data into Postgres matches table using PostgresHook.
     """
-    df = kwargs['ti'].xcom_pull(task_ids='transform')  # Pull DataFrame from XCom
+    ti = kwargs['ti']
+    df = ti.xcom_pull(task_ids='transform')  # Pull DataFrame from XCom
     if df is not None:
-        load_to_postgres(df, **kwargs)
+        hook = PostgresHook(postgres_conn_id='postgres_conn')  # Connection ID configured in Airflow
+        conn = hook.get_conn()
+        cursor = conn.cursor()
+
+        # Insert DataFrame into Postgres table
+        for _, row in df.iterrows():
+            print(row)
+            insert_query = """
+            INSERT INTO matches (
+                away_team, home_team, round, cancelled, finished, match_date, country, name,
+                selected_season, type, home_score, away_score
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, tuple(row))
+        conn.commit()
+
+        logger.info("Data inserted into Postgres successfully!")
+        cursor.close()
+        conn.close()
     else:
         logger.error("No data to insert into Postgres.")
 
@@ -90,12 +98,13 @@ with DAG(
         sql="create_table.sql"
     )
 
-    # Load transformed data into the Postgres table
+    # Load transformed data into the Postgres table using PostgresHook
     insert_into_table_task = PythonOperator(
         task_id='insert_to_table',
         python_callable=insert_into_table_task_func,
         provide_context=True
     )
+
 
     # Task sequence
     extract_task >> transform_task >> create_table_task >> insert_into_table_task

@@ -1,7 +1,11 @@
+-- Drop the table if it exists
+DROP TABLE IF EXISTS matches;
+
+-- Create the table if it does not exist
 CREATE TABLE IF NOT EXISTS matches (
     away_team VARCHAR(100),
     home_team VARCHAR(100),
-    round INT,
+    round VARCHAR(5),
     cancelled BOOLEAN,
     finished BOOLEAN,
     match_date DATE,
