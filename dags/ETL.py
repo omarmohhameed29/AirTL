@@ -15,7 +15,6 @@ from airflow.utils.trigger_rule import TriggerRule
 sys.path.append(os.path.join(os.path.dirname(__file__), '../plugins'))
 from fotmob_scrapper import extract, transform
 from mail_util import send_mail
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
