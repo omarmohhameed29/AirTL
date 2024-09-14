@@ -121,11 +121,9 @@ with DAG(
         python_callable=send_success_mail
     )
 
-    failure_email_task = EmailOperator(
-        task_id="failure_email",
-        to=["om0558064@gmail.com"],
-        subject="Task Failed in Airflow DAG",
-        html_content="<h3>One or more tasks in your Airflow DAG have failed.</h3>",
+    failure_email_task = PythonOperator(
+        task_id='send_failure_email',
+        python_callable=send_failure_mail,
         trigger_rule=TriggerRule.ONE_FAILED
     )
 
