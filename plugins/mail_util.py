@@ -9,8 +9,8 @@ def send_success_mail():
     body = "All Tasks Succeeded"
     message = f"Subject: {subject}\n\n{body}"  # Note the double newline
     
-    server.login("omarmohhameed828@gmail.com", "diceieedwxddhrqc")
-    server.sendmail("omarmohhameed828@gmail.com", "om0558064@gmail.com", message)
+    server.login("Your Email", "Your SMTP Secret Key")
+    server.sendmail("Your Email", "Destination Eamil", message)
     server.quit()
 
 
@@ -23,8 +23,6 @@ def send_failure_mail():
     body = "one or more task failed"
     message = f"Subject: {subject}\n\n{body}"  # Note the double newline
     
-    server.login("omarmohhameed828@gmail.com", "diceieedwxddhrqc")
-    server.sendmail("omarmohhameed828@gmail.com", "om0558064@gmail.com", message)
+    server.login("Your Email", "Your SMTP Secret Key")
+    server.sendmail("Your Email", "Destination Eamil", message)
     server.quit()
-
-# Call the send_mail function
