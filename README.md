@@ -21,7 +21,7 @@ This project demonstrates an ETL (Extract, Transform, Load) pipeline using Apach
 
 ## ETL PipeLine
 
-![pipeline image](assets/pipeline.png)
+![pipeline image](assets/piepline.png)
 
 
 
