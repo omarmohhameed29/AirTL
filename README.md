@@ -10,12 +10,18 @@ This project demonstrates an ETL (Extract, Transform, Load) pipeline using Apach
 - **Data Scraping from API**: To extract data from a specified API.
 - **Data Transformation**: To process and transform the scraped data.
 - **Data Loading into PostgreSQL**: To load the transformed data into a PostgreSQL database.
-- **Email Notifications**: To notify users on task success or failure.
+- **Email Notifications**: To notify users of task success or failure.
 
 ## Project Structure
 
 - `dags/ETL.py`: The main Airflow DAG file defining the ETL workflow.
 - `plugins/fotmob_scrapper.py`: Custom plugin for data scraping from the API.
+- `plugins/mail_utel.py`: For Mail Notification.
+- `plugins/create_table.sql`: Create Tables in PostgreSQL.
+
+## ETL PipeLine
+
+
 
 ## Setup
 
